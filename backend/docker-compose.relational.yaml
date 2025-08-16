@@ -4,7 +4,7 @@ services:
     ports:
       - ${DATABASE_PORT}:5432
     volumes:
-      - mono-project-relational-db:/var/lib/postgresql/data
+      - relational-db:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -32,10 +32,10 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: relational.Dockerfile
     ports:
       - ${APP_PORT}:${APP_PORT}
 
 volumes:
-  mono-project-db:
+  relational-db:

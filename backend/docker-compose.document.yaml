@@ -14,7 +14,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
-      - mono-project-mongo-db:/data/db
+      - document-db:/data/db
     ports:
       - ${DATABASE_PORT}:27017
 
@@ -36,10 +36,10 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: document.Dockerfile
     ports:
       - ${APP_PORT}:${APP_PORT}
 
 volumes:
-  mono-project-mongo-db:
+  document-db:
