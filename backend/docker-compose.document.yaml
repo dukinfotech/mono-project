@@ -1,4 +1,14 @@
 services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl_certificate.pem:/etc/ssl/certs/ssl_certificate.pem;
+      - ./ssl_certificate_key.pem:/etc/ssl/private/ssl_certificate_key.pem;
+
   maildev:
     build:
       context: .
