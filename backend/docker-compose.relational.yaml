@@ -27,12 +27,19 @@ services:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
-
+      
   pgadmin:
     image: dpage/pgadmin4:9.6.0
-    restart: always
+    depends_on:
+      - postgres
     ports:
-      - 8080:8080
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: ${DATABASE_PASSWORD}
+    restart: unless-stopped
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 
   # Uncomment to use redis
   # redis:
@@ -49,3 +56,4 @@ services:
 
 volumes:
   relational-db:
+  pgadmin_data:
