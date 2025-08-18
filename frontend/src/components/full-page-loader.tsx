@@ -1,6 +1,5 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Modal from "@mui/material/Modal";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 type FullPageLoaderType = {
   isLoading: boolean;
@@ -8,18 +7,10 @@ type FullPageLoaderType = {
 
 export function FullPageLoader({ isLoading }: FullPageLoaderType) {
   return (
-    <Modal open={isLoading}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          outline: "none",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    </Modal>
+    <Dialog open={isLoading}>
+      <DialogContent className="flex flex-col items-center justify-center bg-transparent shadow-none border-none">
+        <Loader2 className="animate-spin w-12 h-12 text-primary" />
+      </DialogContent>
+    </Dialog>
   );
 }

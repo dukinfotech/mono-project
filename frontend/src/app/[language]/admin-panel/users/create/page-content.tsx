@@ -1,26 +1,23 @@
 "use client";
 
-import Button from "@mui/material/Button";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import FormTextInput from "@/components/form/text-input/form-text-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { useSnackbar } from "@/hooks/use-snackbar";
-import Link from "@/components/link";
+import NextLink from "next/link";
 import FormAvatarInput from "@/components/form/avatar-input/form-avatar-input";
 import { FileEntity } from "@/services/api/types/file-entity";
 import useLeavePage from "@/services/leave-page/use-leave-page";
-import Box from "@mui/material/Box";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { useTranslation } from "@/services/i18n/client";
 import { usePostUserService } from "@/services/api/services/users";
 import { useRouter } from "next/navigation";
 import { Role, RoleEnum } from "@/services/api/types/role";
 import FormSelectInput from "@/components/form/select/form-select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type CreateFormData = {
   email: string;
@@ -87,14 +84,26 @@ function CreateUserFormActions() {
   useLeavePage(isDirty);
 
   return (
-    <Button
-      variant="contained"
-      color="primary"
-      type="submit"
-      disabled={isSubmitting}
-    >
-      {t("admin-panel-users-create:actions.submit")}
-    </Button>
+    <div className="flex gap-2 mt-4">
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full"
+        data-testid="submit"
+      >
+        {t("admin-panel-users-create:actions.submit")}
+      </Button>
+      <Button
+        variant="outline"
+        asChild
+        className="w-full"
+        data-testid="cancel"
+      >
+        <NextLink href="/admin-panel/users">
+          {t("admin-panel-users-create:actions.cancel")}
+        </NextLink>
+      </Button>
+    </div>
   );
 }
 
@@ -148,28 +157,22 @@ function FormCreateUser() {
 
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit} autoComplete="create-new-user">
-          <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="h6">
-                {t("admin-panel-users-create:title")}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
+      <div className="flex justify-center items-center min-h-[80vh]">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>
+              {t("admin-panel-users-create:title")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} autoComplete="create-new-user" className="space-y-4">
               <FormAvatarInput<CreateFormData> name="photo" testId="photo" />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<CreateFormData>
                 name="email"
                 testId="new-user-email"
                 autoComplete="new-user-email"
                 label={t("admin-panel-users-create:inputs.email.label")}
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<CreateFormData>
                 name="password"
                 type="password"
@@ -177,9 +180,6 @@ function FormCreateUser() {
                 autoComplete="new-user-password"
                 label={t("admin-panel-users-create:inputs.password.label")}
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<CreateFormData>
                 name="passwordConfirmation"
                 testId="new-user-password-confirmation"
@@ -188,25 +188,16 @@ function FormCreateUser() {
                 )}
                 type="password"
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<CreateFormData>
                 name="firstName"
                 testId="first-name"
                 label={t("admin-panel-users-create:inputs.firstName.label")}
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<CreateFormData>
                 name="lastName"
                 testId="last-name"
                 label={t("admin-panel-users-create:inputs.lastName.label")}
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormSelectInput<CreateFormData, Pick<Role, "id">>
                 name="role"
                 testId="role"
@@ -224,24 +215,11 @@ function FormCreateUser() {
                   t(`admin-panel-users-create:inputs.role.options.${option.id}`)
                 }
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <CreateUserFormActions />
-              <Box ml={1} component="span">
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  LinkComponent={Link}
-                  href="/admin-panel/users"
-                >
-                  {t("admin-panel-users-create:actions.cancel")}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
-      </Container>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </FormProvider>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { PropsWithChildren, useContext, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button"
 import {
   LeavePageActionsContext,
   LeavePageContext,
@@ -8,12 +9,8 @@ import {
   LeavePageInfoContext,
   LeavePageModalContext,
 } from "./leave-page-context";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import { Dialog, DialogTitle, DialogContent, DialogHeader, DialogFooter, DialogClose, DialogDescription } from "@/components/ui/dialog"
+
 // Need for leave page logic
 // eslint-disable-next-line no-restricted-imports
 import NextLink from "next/link";
@@ -91,43 +88,38 @@ function Modal() {
   return (
     <Dialog
       open={isOpen}
-      onClose={closeModal}
+      onOpenChange={closeModal}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
       data-testid="want-to-leave-modal"
     >
-      <DialogTitle id="alert-dialog-title">
-        {t("common:leavePage.title")}
-      </DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">
+        <DialogHeader>
+          <DialogTitle id="alert-dialog-title">
+            {t("common:leavePage.title")}
+          </DialogTitle>
+          <DialogDescription id="alert-dialog-description">
           {t("common:leavePage.message")}
-        </DialogContentText>
+          </DialogDescription>
+        </DialogHeader>
       </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={closeModal}
-          color="primary"
+      <DialogFooter>
+        <DialogClose
+          asChild
           autoFocus
           data-testid="stay"
         >
           {t("common:leavePage.stay")}
-        </Button>
-
+        </DialogClose>
         <Button
-          component={NextLink}
-          color="primary"
           onClick={closeModal}
-          // Remove once MUI fixes this
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          href={href}
-          replace={!!leavePage?.replace}
           data-testid="leave"
-        >
+        > 
+        <NextLink href={href} replace={!!leavePage?.replace}>
           {t("common:leavePage.leave")}
+          </NextLink>
         </Button>
-      </DialogActions>
+      </DialogFooter>
     </Dialog>
   );
 }

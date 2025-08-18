@@ -1,15 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
 import { useAuthConfirmEmailService } from "@/services/api/services/auth";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "@/hooks/use-snackbar";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { useTranslation } from "@/services/i18n/client";
+import { Loader2 } from "lucide-react"; // icon loading shadcn
 
 export default function ConfirmEmail() {
   const { enqueueSnackbar } = useSnackbar();
@@ -23,9 +20,7 @@ export default function ConfirmEmail() {
       const hash = params.get("hash");
 
       if (hash) {
-        const { status } = await fetchConfirmEmail({
-          hash,
-        });
+        const { status } = await fetchConfirmEmail({ hash });
 
         if (status === HTTP_CODES_ENUM.NO_CONTENT) {
           enqueueSnackbar(t("confirm-email:emailConfirmed"), {
@@ -45,21 +40,8 @@ export default function ConfirmEmail() {
   }, [fetchConfirmEmail, router, enqueueSnackbar, t]);
 
   return (
-    <Container maxWidth="sm">
-      <Grid container>
-        <Grid size={{ xs: 12 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              p: 2,
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        </Grid>
-      </Grid>
-    </Container>
+    <div className="max-w-md mx-auto flex items-center justify-center h-[60vh]">
+      <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+    </div>
   );
 }

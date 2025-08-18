@@ -7,11 +7,14 @@ import {
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormHelperText from "@mui/material/FormHelperText";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 export type SelectInputProps<T extends object> = {
   label: string;
@@ -33,50 +36,40 @@ function SelectInput<T extends object>(
     value: T | undefined | null;
     onChange: (value: T) => void;
     onBlur: () => void;
-    ref?: Ref<HTMLDivElement | null>;
+    ref?: Ref<HTMLButtonElement | null>;
   }
 ) {
   return (
-    <FormControl fullWidth error={!!props.error} disabled={props.disabled}>
-      <InputLabel id={`select-label-${props.name}`}>{props.label}</InputLabel>
+    <FormItem className="w-full" data-testid={props.testId}>
+      <FormLabel>{props.label}</FormLabel>
       <Select
-        ref={props.ref}
-        labelId={`select-label-${props.name}`}
-        id={`select-${props.name}`}
-        size={props.size}
         value={props.value?.[props.keyValue]?.toString() ?? ""}
-        label={props.label}
-        inputProps={{ readOnly: props.readOnly }}
-        onChange={(event) => {
+        onValueChange={(val) => {
           const newValue = props.options.find(
-            (option) =>
-              option[props.keyValue]?.toString() === event.target.value
+            (option) => option[props.keyValue]?.toString() === val
           );
           if (!newValue) return;
-
           props.onChange(newValue);
         }}
-        onBlur={props.onBlur}
-        data-testid={props.testId}
-        renderValue={() => {
-          return props.value ? props.renderOption(props.value) : undefined;
-        }}
+        disabled={props.disabled}
       >
-        {props.options.map((option) => (
-          <MenuItem
-            key={option[props.keyValue]?.toString()}
-            value={option[props.keyValue]?.toString()}
-          >
-            {props.renderOption(option)}
-          </MenuItem>
-        ))}
+        <SelectTrigger ref={props.ref}>
+          <SelectValue placeholder={`Select ${props.label}`} />
+        </SelectTrigger>
+        <SelectContent>
+          {props.options.map((option) => (
+            <SelectItem
+              key={option[props.keyValue]?.toString()}
+              value={option[props.keyValue]?.toString() ?? ""}
+              data-testid={`${props.testId}-${option[props.keyValue]}`}
+            >
+              {props.renderOption(option)}
+            </SelectItem>
+          ))}
+        </SelectContent>
       </Select>
-      {!!props.error && (
-        <FormHelperText data-testid={`${props.testId}-error`}>
-          {props.error}
-        </FormHelperText>
-      )}
-    </FormControl>
+      {props.error && <FormMessage>{props.error}</FormMessage>}
+    </FormItem>
   );
 }
 

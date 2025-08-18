@@ -1,11 +1,5 @@
 "use client";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import TextField from "@mui/material/TextField";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
+
 import React, { Ref, useState, useRef, useEffect } from "react";
 import {
   Controller,
@@ -13,9 +7,12 @@ import {
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import { ItemProps, ListProps, Virtuoso } from "react-virtuoso";
-import ListItemText from "@mui/material/ListItemText";
-import Box from "@mui/material/Box";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 export type MultipleSelectExtendedInputProps<T extends object> = {
   label: string;
@@ -40,32 +37,6 @@ export type MultipleSelectExtendedInputProps<T extends object> = {
     }
 );
 
-const MUIComponents = {
-  List: function MuiList({
-    style,
-    children,
-    ref,
-  }: ListProps & { ref?: Ref<HTMLDivElement> }) {
-    return (
-      <List
-        style={{ padding: 0, ...style, margin: 0 }}
-        component="div"
-        ref={ref}
-      >
-        {children}
-      </List>
-    );
-  },
-
-  Item: ({ children, ...props }: ItemProps<unknown>) => {
-    return (
-      <ListItem component="div" {...props} style={{ margin: 0 }} disablePadding>
-        {children}
-      </ListItem>
-    );
-  },
-};
-
 function MultipleSelectExtendedInput<T extends object>(
   props: MultipleSelectExtendedInputProps<T> & {
     name: string;
@@ -87,99 +58,95 @@ function MultipleSelectExtendedInput<T extends object>(
   }, [isOpen]);
 
   return (
-    <ClickAwayListener onClickAway={() => setIsOpen(false)}>
-      <div>
-        <Box mb={0.5} ref={boxRef}>
-          <TextField
-            ref={props.ref}
-            name={props.name}
-            value={props.value ? props.renderSelected(props.value) : ""}
-            onBlur={props.onBlur}
-            label={props.label}
-            variant="outlined"
-            onClick={() => {
-              if (props.disabled) return;
-
-              setIsOpen((prev) => !prev);
-            }}
-            fullWidth
-            error={!!props.error}
-            data-testid={props.testId}
-            helperText={props.error}
-            disabled={props.disabled}
-            slotProps={{
-              input: {
-                readOnly: true,
-              },
-              formHelperText: {
-                ["data-testid" as string]: `${props.testId}-error`,
-              },
-            }}
-          />
-        </Box>
-
-        {isOpen && (
-          <Card>
-            <CardContent
-              sx={{
-                p: 0,
-                "&:last-child": {
-                  pb: 0,
-                },
-              }}
-            >
-              {props.isSearchable && (
-                <Box p={2}>
-                  <TextField
-                    placeholder={props.searchPlaceholder}
-                    value={props.search}
-                    onChange={(e) => props.onSearchChange?.(e.target.value)}
-                    label={props.searchLabel}
-                    variant="outlined"
-                    autoFocus
-                    fullWidth
-                    data-testid={`${props.testId}-search`}
-                  />
-                </Box>
-              )}
-
-              <Virtuoso
-                style={{
-                  height:
-                    props.options.length <= 6 ? props.options.length * 48 : 320,
-                }}
-                data={props.options}
-                endReached={props.onEndReached}
-                components={MUIComponents}
-                itemContent={(index, item) => (
-                  <ListItemButton
-                    selected={valueKeys.includes(props.keyExtractor(item))}
-                    onClick={() => {
-                      const newValue = props.value
-                        ? valueKeys.includes(props.keyExtractor(item))
-                          ? props.value.filter(
-                              (selectedItem) =>
-                                props.keyExtractor(selectedItem) !==
-                                props.keyExtractor(item)
-                            )
-                          : [...props.value, item]
-                        : [item];
-                      props.onChange(newValue);
-                    }}
-                  >
-                    {item ? (
-                      <ListItemText primary={props.renderOption(item)} />
-                    ) : (
-                      <></>
-                    )}
-                  </ListItemButton>
-                )}
-              />
-            </CardContent>
-          </Card>
+    <div className="w-full" ref={boxRef}>
+      <div className="mb-1">
+        <Label htmlFor={props.name}>{props.label}</Label>
+        <Input
+          ref={props.ref as any}
+          id={props.name}
+          name={props.name}
+          value={props.value ? (props.renderSelected(props.value) as any) : ""}
+          onBlur={props.onBlur}
+          onClick={() => {
+            if (props.disabled) return;
+            setIsOpen((prev) => !prev);
+          }}
+          readOnly
+          disabled={props.disabled}
+          data-testid={props.testId}
+          className={cn(props.error && "border-red-500")}
+        />
+        {props.error && (
+          <p
+            className="mt-1 text-sm text-red-500"
+            data-testid={`${props.testId}-error`}
+          >
+            {props.error}
+          </p>
         )}
       </div>
-    </ClickAwayListener>
+
+      {isOpen && (
+        <Card className="w-full mt-2">
+          <CardContent className="p-0">
+            {props.isSearchable && (
+              <div className="p-2">
+                <Label htmlFor={`${props.name}-search`}>
+                  {props.searchLabel}
+                </Label>
+                <Input
+                  id={`${props.name}-search`}
+                  placeholder={props.searchPlaceholder}
+                  value={props.search}
+                  onChange={(e) => props.onSearchChange?.(e.target.value)}
+                  autoFocus
+                  data-testid={`${props.testId}-search`}
+                />
+              </div>
+            )}
+
+            <ScrollArea
+              className={cn(
+                "max-h-80",
+                props.options.length <= 6
+                  ? `h-[${props.options.length * 48}px]`
+                  : "h-80"
+              )}
+            >
+              <div className="flex flex-col">
+                {props.options.map((item) => {
+                  const isSelected = valueKeys.includes(props.keyExtractor(item));
+                  return (
+                    <button
+                      key={props.keyExtractor(item)}
+                      type="button"
+                      className={cn(
+                        "px-4 py-2 text-left hover:bg-accent hover:text-accent-foreground",
+                        isSelected && "bg-accent text-accent-foreground"
+                      )}
+                      onClick={() => {
+                        const newValue = props.value
+                          ? isSelected
+                            ? props.value.filter(
+                                (selectedItem) =>
+                                  props.keyExtractor(selectedItem) !==
+                                  props.keyExtractor(item)
+                              )
+                            : [...props.value, item]
+                          : [item];
+                        props.onChange(newValue);
+                      }}
+                    >
+                      {props.renderOption(item)}
+                    </button>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
 

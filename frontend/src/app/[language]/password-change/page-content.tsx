@@ -1,11 +1,8 @@
 "use client";
-import Button from "@mui/material/Button";
+
 import withPageRequiredGuest from "@/services/auth/with-page-required-guest";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
 import { useAuthResetPasswordService } from "@/services/api/services/auth";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import FormTextInput from "@/components/form/text-input/form-text-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -14,7 +11,19 @@ import { useRouter } from "next/navigation";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { useTranslation } from "@/services/i18n/client";
 import { useEffect, useMemo, useState } from "react";
-import Alert from "@mui/material/Alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
 type PasswordChangeFormData = {
   password: string;
@@ -47,11 +56,10 @@ function FormActions() {
 
   return (
     <Button
-      variant="contained"
-      color="primary"
       type="submit"
       disabled={isSubmitting}
       data-testid="set-password"
+      className="w-full"
     >
       {t("password-change:actions.submit")}
     </Button>
@@ -64,7 +72,6 @@ function ExpiresAlert() {
 
   const expires = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
-
     return Number(params.get("expires"));
   }, []);
 
@@ -72,7 +79,6 @@ function ExpiresAlert() {
     const interval = setInterval(() => {
       const now = Date.now();
       setCurrentTime(now);
-
       if (expires < now) {
         clearInterval(interval);
       }
@@ -85,11 +91,12 @@ function ExpiresAlert() {
 
   return (
     isExpired && (
-      <Grid size={{ xs: 12 }}>
-        <Alert severity="error" data-testid="reset-link-expired-alert">
+      <Alert variant="destructive" data-testid="reset-link-expired-alert">
+        <AlertTitle>{t("password-change:alerts.expired")}</AlertTitle>
+        <AlertDescription>
           {t("password-change:alerts.expired")}
-        </Alert>
-      </Grid>
+        </AlertDescription>
+      </Alert>
     )
   );
 }
@@ -132,7 +139,6 @@ function Form() {
           });
         }
       );
-
       return;
     }
 
@@ -140,43 +146,41 @@ function Form() {
       enqueueSnackbar(t("password-change:alerts.success"), {
         variant: "success",
       });
-
       router.replace("/sign-in");
     }
   });
 
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit}>
-          <Grid container spacing={2} mb={2}>
-            <Grid size={{ xs: 12 }} mt={3}>
-              <Typography variant="h6">{t("password-change:title")}</Typography>
-            </Grid>
-            <ExpiresAlert />
-            <Grid size={{ xs: 12 }}>
+      <div className="flex justify-center items-center min-h-[60vh] px-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">
+              {t("password-change:title")}
+            </CardTitle>
+          </CardHeader>
+          <form onSubmit={onSubmit}>
+            <CardContent className="space-y-4">
+              <ExpiresAlert />
               <FormTextInput<PasswordChangeFormData>
                 name="password"
                 label={t("password-change:inputs.password.label")}
                 type="password"
                 testId="password"
               />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<PasswordChangeFormData>
                 name="passwordConfirmation"
                 label={t("password-change:inputs.passwordConfirmation.label")}
                 type="password"
                 testId="password-confirmation"
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
+            </CardContent>
+            <CardFooter>
               <FormActions />
-            </Grid>
-          </Grid>
-        </form>
-      </Container>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </FormProvider>
   );
 }

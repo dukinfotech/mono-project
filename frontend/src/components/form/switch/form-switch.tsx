@@ -6,14 +6,16 @@ import {
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import FormLabel from "@mui/material/FormLabel";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
-import Switch from "@mui/material/Switch";
 import { Ref } from "react";
+
+import {
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export type SwitchInputProps<T> = {
   label: string;
@@ -54,46 +56,41 @@ function SwitchInput<T>(
   };
 
   return (
-    <FormControl
-      component="fieldset"
-      variant="standard"
-      error={!!props.error}
-      data-testid={props.testId}
-    >
-      <FormLabel component="legend" data-testid={`${props.testId}-label`}>
+    <FormItem ref={props.ref} data-testid={props.testId} className="space-y-2">
+      <FormLabel data-testid={`${props.testId}-label`}>
         {props.label}
       </FormLabel>
-      <FormGroup ref={props.ref}>
+      <div className="space-y-2">
         {props.options.map((option) => (
-          <FormControlLabel
+          <div
             key={props.keyExtractor(option)}
-            control={
-              <Switch
-                checked={value
-                  .map((val) => val[props.keyValue])
-                  .includes(option[props.keyValue])}
-                onChange={onChange(option)}
-                name={props.name}
-                data-testid={`${props.testId}-${props.keyExtractor(option)}`}
-              />
-            }
-            label={props.renderOption(option)}
-          />
+            className="flex items-center space-x-2"
+          >
+            <Switch
+              checked={value
+                .map((val) => val[props.keyValue])
+                .includes(option[props.keyValue])}
+              onCheckedChange={onChange(option)}
+              disabled={props.disabled}
+              data-testid={`${props.testId}-${props.keyExtractor(option)}`}
+            />
+            <Label>{props.renderOption(option)}</Label>
+          </div>
         ))}
-      </FormGroup>
+      </div>
       {!!props.error && (
-        <FormHelperText data-testid={`${props.testId}-error`}>
+        <FormMessage data-testid={`${props.testId}-error`}>
           {props.error}
-        </FormHelperText>
+        </FormMessage>
       )}
-    </FormControl>
+    </FormItem>
   );
 }
 
 function FormSwitchInput<
   TFieldValues extends FieldValues = FieldValues,
   T = unknown,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >(
   props: SwitchInputProps<T> &
     Pick<ControllerProps<TFieldValues, TName>, "name" | "defaultValue">

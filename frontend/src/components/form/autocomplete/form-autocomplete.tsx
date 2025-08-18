@@ -1,16 +1,34 @@
 "use client";
 
-import { Ref } from "react";
+import * as React from "react";
 import {
   Controller,
   ControllerProps,
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import FormControl from "@mui/material/FormControl";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import FormHelperText from "@mui/material/FormHelperText";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type AutocompleteInputProps<T> = {
   label: string;
@@ -19,70 +37,102 @@ export type AutocompleteInputProps<T> = {
   readOnly?: boolean;
   error?: string;
   testId?: string;
-  size?: "small" | "medium";
   value: T | null;
   options: T[];
   renderOption: (option: T) => React.ReactNode;
   getOptionLabel: (option: T) => string;
 };
 
-function AutocompleteInput<T>(
-  props: AutocompleteInputProps<T> & {
-    name: string;
-    value: T | undefined | null;
-    onChange: (value: T) => void;
-    onBlur: () => void;
-    ref?: Ref<HTMLDivElement | null>;
-  }
-) {
-  return (
-    <FormControl error={!!props.error} disabled={props.disabled} fullWidth>
-      <Autocomplete
-        ref={props.ref}
-        id={`autocomplete-${props.name}`}
-        options={props.options}
-        value={props.value}
-        onChange={(_, newValue) => {
-          if (!newValue) return;
+function AutocompleteInput<T>({
+  label,
+  disabled,
+  readOnly,
+  error,
+  testId,
+  value,
+  options,
+  onChange,
+  renderOption,
+  getOptionLabel,
+}: AutocompleteInputProps<T> & {
+  name: string;
+  value: T | null;
+  onChange: (value: T) => void;
+  onBlur: () => void;
+}) {
+  const [open, setOpen] = React.useState(false);
 
-          props.onChange(newValue);
-        }}
-        onBlur={props.onBlur}
-        data-testid={props.testId}
-        getOptionLabel={props.getOptionLabel}
-        renderOption={(htmlProps, option) => (
-          <li {...htmlProps}>{props.renderOption(option)}</li>
-        )}
-        renderInput={(params) => (
-          <TextField {...params} label={props.label} size={props.size} />
-        )}
-      />
-      {!!props.error && (
-        <FormHelperText data-testid={`${props.testId}-error`}>
-          {props.error}
-        </FormHelperText>
-      )}
-    </FormControl>
+  return (
+    <FormItem className="w-full">
+      <FormLabel>{label}</FormLabel>
+      <FormControl>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              disabled={disabled || readOnly}
+              data-testid={testId}
+              className="w-full justify-between"
+            >
+              {value ? getOptionLabel(value) : "Select..."}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+            <Command>
+              <CommandInput placeholder="Search..." autoFocus />
+              <CommandEmpty>No result.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option, idx) => {
+                  const isSelected = value
+                    ? getOptionLabel(option) === getOptionLabel(value)
+                    : false;
+                  return (
+                    <CommandItem
+                      key={idx}
+                      onSelect={() => {
+                        onChange(option);
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          isSelected ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {renderOption(option)}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </FormControl>
+      {error && <FormMessage>{error}</FormMessage>}
+    </FormItem>
   );
 }
 
 function FormAutocompleteInput<
   TFieldValues extends FieldValues = FieldValues,
   T = unknown,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >(
   props: AutocompleteInputProps<T> &
     Pick<ControllerProps<TFieldValues, TName>, "name" | "defaultValue">
 ) {
   return (
-    <Controller
+    <FormField
       name={props.name}
       defaultValue={props.defaultValue}
       render={({ field, fieldState }) => (
         <AutocompleteInput<T>
           {...field}
           label={props.label}
-          autoFocus={props.autoFocus}
           error={fieldState.error?.message}
           disabled={props.disabled}
           readOnly={props.readOnly}
@@ -90,8 +140,10 @@ function FormAutocompleteInput<
           options={props.options}
           renderOption={props.renderOption}
           getOptionLabel={props.getOptionLabel}
-          size={props.size}
-          value={props.value}
+          value={field.value}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          name={props.name}
         />
       )}
     />

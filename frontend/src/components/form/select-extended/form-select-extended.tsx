@@ -1,10 +1,5 @@
 "use client";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import TextField from "@mui/material/TextField";
+
 import React, { Ref, useState, useRef, useEffect } from "react";
 import {
   Controller,
@@ -12,10 +7,11 @@ import {
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import { ItemProps, ListProps, Virtuoso } from "react-virtuoso";
-import ListItemText from "@mui/material/ListItemText";
-import Box from "@mui/material/Box";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
+import { Virtuoso, ItemProps, ListProps } from "react-virtuoso";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export type SelectExtendedInputProps<T extends object> = {
   label: string;
@@ -40,28 +36,28 @@ export type SelectExtendedInputProps<T extends object> = {
     }
 );
 
-const MUIComponents = {
-  List: function MuiList({
+const ShadcnComponents = {
+  List: function ListWrapper({
     style,
     children,
     ref,
   }: ListProps & { ref?: Ref<HTMLDivElement> }) {
     return (
-      <List
-        style={{ padding: 0, ...style, margin: 0 }}
-        component="div"
+      <div
         ref={ref}
+        style={{ padding: 0, margin: 0, ...style }}
+        className="flex flex-col"
       >
         {children}
-      </List>
+      </div>
     );
   },
 
   Item: ({ children, ...props }: ItemProps<unknown>) => {
     return (
-      <ListItem component="div" {...props} style={{ margin: 0 }} disablePadding>
+      <div {...props} className="flex w-full items-center">
         {children}
-      </ListItem>
+      </div>
     );
   },
 };
@@ -76,112 +72,105 @@ function SelectExtendedInput<T extends object>(
   }
 ) {
   const [isOpen, setIsOpen] = useState(false);
-  const boxRef = useRef<HTMLInputElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
+  // đóng khi click outside
   useEffect(() => {
-    if (isOpen) {
-      boxRef.current?.scrollIntoView({ behavior: "smooth" });
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
     }
-  }, [isOpen]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <ClickAwayListener onClickAway={() => setIsOpen(false)}>
-      <div>
-        <Box mb={0.5} ref={boxRef}>
-          <TextField
-            ref={props.ref}
-            name={props.name}
-            value={props.value ? props.renderOption(props.value) : ""}
-            onBlur={props.onBlur}
-            label={props.label}
-            variant="outlined"
-            onClick={() => {
-              if (props.disabled) return;
-
-              setIsOpen((prev) => !prev);
-            }}
-            fullWidth
-            error={!!props.error}
-            data-testid={props.testId}
-            helperText={props.error}
-            disabled={props.disabled}
-            slotProps={{
-              input: {
-                readOnly: true,
-              },
-              formHelperText: {
-                ["data-testid" as string]: `${props.testId}-error`,
-              },
-            }}
-          />
-        </Box>
-
-        {isOpen && (
-          <Card>
-            <CardContent
-              sx={{
-                p: 0,
-                "&:last-child": {
-                  pb: 0,
-                },
-              }}
-            >
-              {props.isSearchable && (
-                <Box p={2}>
-                  <TextField
-                    placeholder={props.searchPlaceholder}
-                    value={props.search}
-                    onChange={(e) => props.onSearchChange?.(e.target.value)}
-                    label={props.searchLabel}
-                    variant="outlined"
-                    autoFocus
-                    fullWidth
-                    data-testid={`${props.testId}-search`}
-                  />
-                </Box>
-              )}
-
-              <Virtuoso
-                style={{
-                  height:
-                    props.options.length <= 6 ? props.options.length * 48 : 320,
-                }}
-                data={props.options}
-                endReached={props.onEndReached}
-                components={MUIComponents}
-                itemContent={(index, item) => (
-                  <ListItemButton
-                    selected={
-                      props.value
-                        ? props.keyExtractor(item) ===
-                          props.keyExtractor(props.value)
-                        : false
-                    }
-                    onClick={() => {
-                      props.onChange(item);
-                      setIsOpen(false);
-                    }}
-                  >
-                    {item ? (
-                      <ListItemText primary={props.renderOption(item)} />
-                    ) : (
-                      <></>
-                    )}
-                  </ListItemButton>
-                )}
-              />
-            </CardContent>
-          </Card>
+    <div ref={wrapperRef} className="w-full">
+      <div className="mb-1">
+        <Label htmlFor={props.name}>{props.label}</Label>
+        <Input
+          ref={inputRef}
+          id={props.name}
+          name={props.name}
+          value={props.value ? (props.renderOption(props.value) as string) : ""}
+          onBlur={props.onBlur}
+          readOnly
+          disabled={props.disabled}
+          data-testid={props.testId}
+          onClick={() => {
+            if (!props.disabled) setIsOpen((prev) => !prev);
+          }}
+          className={cn(props.error && "border-red-500")}
+        />
+        {props.error && (
+          <p
+            className="text-sm text-red-500 mt-1"
+            data-testid={`${props.testId}-error`}
+          >
+            {props.error}
+          </p>
         )}
       </div>
-    </ClickAwayListener>
+
+      {isOpen && (
+        <Card className="mt-2 shadow-lg">
+          <CardContent className="p-0">
+            {props.isSearchable && (
+              <div className="p-2">
+                <Label>{props.searchLabel}</Label>
+                <Input
+                  placeholder={props.searchPlaceholder}
+                  value={props.search}
+                  onChange={(e) => props.onSearchChange?.(e.target.value)}
+                  autoFocus
+                  data-testid={`${props.testId}-search`}
+                />
+              </div>
+            )}
+
+            <Virtuoso
+              style={{
+                height:
+                  props.options.length <= 6 ? props.options.length * 48 : 320,
+              }}
+              data={props.options}
+              endReached={props.onEndReached}
+              components={ShadcnComponents}
+              itemContent={(index, item) => (
+                <button
+                  type="button"
+                  className={cn(
+                    "w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground",
+                    props.value &&
+                      props.keyExtractor(item) ===
+                        props.keyExtractor(props.value) &&
+                      "bg-accent text-accent-foreground"
+                  )}
+                  onClick={() => {
+                    props.onChange(item);
+                    setIsOpen(false);
+                  }}
+                >
+                  {item ? props.renderOption(item) : null}
+                </button>
+              )}
+            />
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
 
 function FormSelectExtendedInput<
   TFieldValues extends FieldValues = FieldValues,
   T extends object = object,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >(
   props: Pick<ControllerProps<TFieldValues, TName>, "name" | "defaultValue"> &
     SelectExtendedInputProps<T>

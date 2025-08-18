@@ -1,11 +1,12 @@
 import { Ref } from "react";
-import Table, { TableProps } from "@mui/material/Table";
-import TableBody, { TableBodyProps } from "@mui/material/TableBody";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableFooter from "@mui/material/TableFooter";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import {
+  Table,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   ScrollerProps,
   TableComponents as TableComponentsType,
@@ -15,16 +16,24 @@ const TableComponents = {
   Scroller: function Scroller(
     props: ScrollerProps & { ref?: Ref<HTMLDivElement> }
   ) {
-    return <TableContainer component={Paper} {...props} ref={props.ref} />;
+    return (
+      <div
+        ref={props.ref}
+        className="overflow-auto border rounded-md"
+        {...props}
+      />
+    );
   },
-  Table: (props: TableProps) => (
-    <Table stickyHeader {...props} style={{ borderCollapse: "separate" }} />
+  Table: (props: React.ComponentProps<typeof Table>) => (
+    <Table {...props} className="border-collapse-separate" />
   ),
-  TableHead: TableHead as unknown as TableComponentsType["TableHead"],
+  TableHead: TableHeader as unknown as TableComponentsType["TableHead"],
   TableFoot: TableFooter as unknown as TableComponentsType["TableFoot"],
   TableRow: TableRow,
   TableBody: function BodyTable(
-    props: TableBodyProps & { ref?: Ref<HTMLTableSectionElement> }
+    props: React.ComponentProps<typeof TableBody> & {
+      ref?: Ref<HTMLTableSectionElement>;
+    }
   ) {
     return <TableBody {...props} ref={props.ref} />;
   },

@@ -1,25 +1,35 @@
-import * as React from "react";
-import {
-  DatePicker,
-  DateView,
-  LocalizationProvider,
-} from "@mui/x-date-pickers";
+"use client";
+
+import { Ref } from "react";
 import {
   Controller,
   ControllerProps,
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import { Ref } from "react";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import useLanguage from "@/services/i18n/use-language";
-import { getValueByKey } from "@/components/form/date-pickers/helper";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { cn } from "@/lib/utils";
 
 type ValueDateType = Date | null | undefined;
+
 export type DatePickerFieldProps = {
   disabled?: boolean;
   className?: string;
-  views?: readonly DateView[] | undefined;
   minDate?: Date;
   maxDate?: Date;
   autoFocus?: boolean;
@@ -39,43 +49,49 @@ function DatePickerInput(
     ref?: Ref<HTMLDivElement | null>;
   }
 ) {
-  const language = useLanguage();
-
   return (
-    <LocalizationProvider
-      dateAdapter={AdapterDateFns}
-      adapterLocale={getValueByKey(language)}
-    >
-      <DatePicker
-        ref={props.ref}
-        name={props.name}
-        label={props.label}
-        value={props.value}
-        onClose={props.onBlur}
-        disabled={props.disabled}
-        autoFocus={props.autoFocus}
-        defaultValue={props.defaultValue}
-        readOnly={props.readOnly}
-        slotProps={{
-          textField: {
-            helperText: props.error,
-            error: !!props.error,
-            InputProps: { readOnly: props.readOnly },
-          },
-        }}
-        onAccept={props.onChange}
-        minDate={props.minDate}
-        maxDate={props.maxDate}
-        views={props.views}
-        data-testid={props.testId}
-      />
-    </LocalizationProvider>
+    <FormItem className={cn("flex flex-col space-y-2", props.className)} data-testid={props.testId}>
+      <FormLabel htmlFor={props.name}>{props.label}</FormLabel>
+      <FormControl>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              disabled={props.disabled || props.readOnly}
+              className={cn(
+                "w-[280px] justify-start text-left font-normal",
+                !props.value && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {props.value ? format(props.value, "PPP") : "Pick a date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={props.value ?? undefined}
+              onSelect={props.onChange}
+              disabled={props.disabled}
+              fromDate={props.minDate}
+              toDate={props.maxDate}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+      </FormControl>
+      {!!props.error && (
+        <FormMessage data-testid={`${props.testId}-error`}>
+          {props.error}
+        </FormMessage>
+      )}
+    </FormItem>
   );
 }
 
 function FormDatePickerInput<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >(
   props: DatePickerFieldProps &
     Pick<ControllerProps<TFieldValues, TName>, "name" | "defaultValue">
@@ -84,23 +100,20 @@ function FormDatePickerInput<
     <Controller
       name={props.name}
       defaultValue={props.defaultValue}
-      render={({ field, fieldState }) => {
-        return (
-          <DatePickerInput
-            {...field}
-            defaultValue={props.defaultValue}
-            autoFocus={props.autoFocus}
-            label={props.label}
-            disabled={props.disabled}
-            readOnly={props.readOnly}
-            views={props.views}
-            testId={props.testId}
-            minDate={props.minDate}
-            maxDate={props.maxDate}
-            error={fieldState.error?.message}
-          />
-        );
-      }}
+      render={({ field, fieldState }) => (
+        <DatePickerInput
+          {...field}
+          defaultValue={props.defaultValue}
+          autoFocus={props.autoFocus}
+          label={props.label}
+          disabled={props.disabled}
+          readOnly={props.readOnly}
+          testId={props.testId}
+          minDate={props.minDate}
+          maxDate={props.maxDate}
+          error={fieldState.error?.message}
+        />
+      )}
     />
   );
 }

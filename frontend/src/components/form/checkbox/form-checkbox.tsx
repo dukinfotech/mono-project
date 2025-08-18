@@ -7,12 +7,9 @@ import {
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import FormLabel from "@mui/material/FormLabel";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import FormGroup from "@mui/material/FormGroup";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export type CheckboxInputProps<T> = {
   label: string;
@@ -51,40 +48,46 @@ function CheckboxInput<T>(
 
     props.onChange(newValue);
   };
+
   return (
-    <FormControl
+    <div
       data-testid={props.testId}
-      component="fieldset"
-      variant="standard"
-      error={!!props.error}
+      className={cn("space-y-2", props.disabled && "opacity-60 pointer-events-none")}
+      ref={props.ref as any}
     >
-      <FormLabel component="legend" data-testid={`${props.testId}-label`}>
-        {props.label}
-      </FormLabel>
-      <FormGroup ref={props.ref}>
-        {props.options.map((option) => (
-          <FormControlLabel
-            key={props.keyExtractor(option)}
-            control={
-              <Checkbox
-                checked={value
-                  .map((valueOption) => valueOption[props.keyValue])
-                  .includes(option[props.keyValue])}
-                onChange={onChange(option)}
-                name={props.name}
-                data-testid={`${props.testId}-${props.keyExtractor(option)}`}
-              />
-            }
-            label={props.renderOption(option)}
-          />
-        ))}
-      </FormGroup>
-      {!!props.error && (
-        <FormHelperText data-testid={`${props.testId}-error`}>
-          {props.error}
-        </FormHelperText>
+      {props.label && (
+        <Label data-testid={`${props.testId}-label`} className="mb-1 block">
+          {props.label}
+        </Label>
       )}
-    </FormControl>
+      <div className="flex flex-col gap-2">
+        {props.options.map((option) => (
+          <label
+            key={props.keyExtractor(option)}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <Checkbox
+              checked={value
+                .map((valueOption) => valueOption[props.keyValue])
+                .includes(option[props.keyValue])}
+              onCheckedChange={onChange(option)}
+              name={props.name}
+              disabled={props.disabled}
+              data-testid={`${props.testId}-${props.keyExtractor(option)}`}
+            />
+            {props.renderOption(option)}
+          </label>
+        ))}
+      </div>
+      {!!props.error && (
+        <p
+          className="mt-1 text-xs text-destructive"
+          data-testid={`${props.testId}-error`}
+        >
+          {props.error}
+        </p>
+      )}
+    </div>
   );
 }
 

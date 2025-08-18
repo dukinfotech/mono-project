@@ -1,21 +1,16 @@
 "use client";
 
-import Button from "@mui/material/Button";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import FormTextInput from "@/components/form/text-input/form-text-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { useEffect } from "react";
 import { useSnackbar } from "@/hooks/use-snackbar";
-import Link from "@/components/link";
+import NextLink from "next/link";
 import FormAvatarInput from "@/components/form/avatar-input/form-avatar-input";
 import { FileEntity } from "@/services/api/types/file-entity";
 import useLeavePage from "@/services/leave-page/use-leave-page";
-import Box from "@mui/material/Box";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { useTranslation } from "@/services/i18n/client";
 import {
@@ -25,6 +20,8 @@ import {
 import { useParams } from "next/navigation";
 import { Role, RoleEnum } from "@/services/api/types/role";
 import FormSelectInput from "@/components/form/select/form-select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type EditUserFormData = {
   email: string;
@@ -99,14 +96,16 @@ function EditUserFormActions() {
   useLeavePage(isDirty);
 
   return (
-    <Button
-      variant="contained"
-      color="primary"
-      type="submit"
-      disabled={isSubmitting}
-    >
-      {t("admin-panel-users-edit:actions.submit")}
-    </Button>
+    <div className="flex gap-2 mt-4">
+      <Button type="submit" disabled={isSubmitting} data-testid="submit" className="w-full">
+        {t("admin-panel-users-edit:actions.submit")}
+      </Button>
+      <Button asChild variant="outline" className="w-full" data-testid="cancel">
+        <NextLink href="/admin-panel/users">
+          {t("admin-panel-users-edit:actions.cancel")}
+        </NextLink>
+      </Button>
+    </div>
   );
 }
 
@@ -116,14 +115,16 @@ function ChangePasswordUserFormActions() {
   useLeavePage(isDirty);
 
   return (
-    <Button
-      variant="contained"
-      color="primary"
-      type="submit"
-      disabled={isSubmitting}
-    >
-      {t("admin-panel-users-edit:actions.submit")}
-    </Button>
+    <div className="flex gap-2 mt-4">
+      <Button type="submit" disabled={isSubmitting} data-testid="submit" className="w-full">
+        {t("admin-panel-users-edit:actions.submit")}
+      </Button>
+      <Button asChild variant="outline" className="w-full" data-testid="cancel">
+        <NextLink href="/admin-panel/users">
+          {t("admin-panel-users-edit:actions.cancel")}
+        </NextLink>
+      </Button>
+    </div>
   );
 }
 
@@ -201,43 +202,31 @@ function FormEditUser() {
 
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit}>
-          <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="h6">
-                {t("admin-panel-users-edit:title1")}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>
+              {t("admin-panel-users-edit:title1")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} className="space-y-4">
               <FormAvatarInput<EditUserFormData> name="photo" testId="photo" />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<EditUserFormData>
                 name="email"
                 testId="email"
                 label={t("admin-panel-users-edit:inputs.email.label")}
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<EditUserFormData>
                 name="firstName"
                 testId="first-name"
                 label={t("admin-panel-users-edit:inputs.firstName.label")}
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<EditUserFormData>
                 name="lastName"
                 testId="last-name"
                 label={t("admin-panel-users-edit:inputs.lastName.label")}
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormSelectInput<EditUserFormData, Pick<Role, "id">>
                 name="role"
                 testId="role"
@@ -255,24 +244,11 @@ function FormEditUser() {
                   t(`admin-panel-users-edit:inputs.role.options.${option.id}`)
                 }
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <EditUserFormActions />
-              <Box ml={1} component="span">
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  LinkComponent={Link}
-                  href="/admin-panel/users"
-                >
-                  {t("admin-panel-users-edit:actions.cancel")}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
-      </Container>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </FormProvider>
   );
 }
@@ -323,24 +299,20 @@ function FormChangePasswordUser() {
 
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit}>
-          <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="h6">
-                {t("admin-panel-users-edit:title2")}
-              </Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
+      <div className="flex justify-center items-center min-h-[40vh]">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>
+              {t("admin-panel-users-edit:title2")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} className="space-y-4">
               <FormTextInput<ChangeUserPasswordFormData>
                 name="password"
                 type="password"
                 label={t("admin-panel-users-edit:inputs.password.label")}
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <FormTextInput<ChangeUserPasswordFormData>
                 name="passwordConfirmation"
                 label={t(
@@ -348,24 +320,11 @@ function FormChangePasswordUser() {
                 )}
                 type="password"
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
               <ChangePasswordUserFormActions />
-              <Box ml={1} component="span">
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  LinkComponent={Link}
-                  href="/admin-panel/users"
-                >
-                  {t("admin-panel-users-edit:actions.cancel")}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
-      </Container>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </FormProvider>
   );
 }

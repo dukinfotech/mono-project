@@ -1,11 +1,7 @@
 "use client";
 
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogTitle, DialogContent, DialogHeader, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import {
   ConfirmDialogActionsContext,
   ConfirmDialogOptions,
@@ -31,8 +27,8 @@ function ConfirmDialogProvider({ children }: { children: React.ReactNode }) {
     useState<ConfirmDialogOptions>(defaultConfirmDialogInfo);
   const resolveRef = useRef<(value: boolean) => void>(undefined);
 
-  const handleClose = () => {
-    setIsOpen(false);
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
   };
 
   const onCancel = () => {
@@ -73,7 +69,7 @@ function ConfirmDialogProvider({ children }: { children: React.ReactNode }) {
       </ConfirmDialogActionsContext.Provider>
       <Dialog
         open={isOpen}
-        onClose={handleClose}
+        onOpenChange={handleOpenChange}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
@@ -81,18 +77,20 @@ function ConfirmDialogProvider({ children }: { children: React.ReactNode }) {
           {confirmDialogInfo.title}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {confirmDialogInfo.message}
-          </DialogContentText>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription id="alert-dialog-description">
+              {confirmDialogInfo.message}</DialogDescription>
+          </DialogHeader>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={onCancel}>
+        < DialogFooter>
+          <Button onClick={onCancel} asChild>
             {confirmDialogInfo.cancelButtonText}
           </Button>
-          <Button onClick={onSuccess} autoFocus>
+          <Button onClick={onSuccess} asChild autoFocus>
             {confirmDialogInfo.successButtonText}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
     </>
   );

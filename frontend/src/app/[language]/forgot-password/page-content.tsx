@@ -1,17 +1,22 @@
 "use client";
-import Button from "@mui/material/Button";
+
 import withPageRequiredGuest from "@/services/auth/with-page-required-guest";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
 import { useAuthForgotPasswordService } from "@/services/api/services/auth";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import FormTextInput from "@/components/form/text-input/form-text-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSnackbar } from "@/hooks/use-snackbar";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { useTranslation } from "@/services/i18n/client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 
 type ForgotPasswordFormData = {
   email: string;
@@ -34,11 +39,10 @@ function FormActions() {
 
   return (
     <Button
-      variant="contained"
-      color="primary"
       type="submit"
       disabled={isSubmitting}
       data-testid="send-email"
+      className="w-full"
     >
       {t("forgot-password:actions.submit")}
     </Button>
@@ -74,7 +78,6 @@ function Form() {
           });
         }
       );
-
       return;
     }
 
@@ -87,27 +90,28 @@ function Form() {
 
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit}>
-          <Grid container spacing={2} mb={2}>
-            <Grid size={{ xs: 12 }} mt={3}>
-              <Typography variant="h6">{t("forgot-password:title")}</Typography>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
+      <div className="flex justify-center items-center min-h-[60vh] px-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">
+              {t("forgot-password:title")}
+            </CardTitle>
+          </CardHeader>
+          <form onSubmit={onSubmit}>
+            <CardContent className="space-y-4">
               <FormTextInput<ForgotPasswordFormData>
                 name="email"
                 label={t("forgot-password:inputs.email.label")}
                 type="email"
                 testId="email"
               />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
+            </CardContent>
+            <CardFooter>
               <FormActions />
-            </Grid>
-          </Grid>
-        </form>
-      </Container>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </FormProvider>
   );
 }

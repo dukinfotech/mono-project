@@ -7,12 +7,16 @@ import {
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import FormLabel from "@mui/material/FormLabel";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/ui/radio-group";
+import {
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
 
 export type RadioInputProps<T> = {
   label: string;
@@ -39,42 +43,53 @@ function RadioInput<T>(
 ) {
   const value = props.value;
 
-  const onChange = (radioValue: T) => () => {
-    props.onChange(radioValue);
-  };
-
   return (
-    <FormControl
-      data-testid={props.testId}
-      component="fieldset"
-      variant="standard"
-      error={!!props.error}
-    >
-      <FormLabel component="legend" data-testid={`${props.testId}-label`}>
+    <FormItem data-testid={props.testId}>
+      <FormLabel data-testid={`${props.testId}-label`}>
         {props.label}
       </FormLabel>
-      <RadioGroup ref={props.ref}>
-        {props.options.map((option) => (
-          <FormControlLabel
-            key={props.keyExtractor(option)}
-            control={
-              <Radio
-                checked={option[props.keyValue] === value?.[props.keyValue]}
-                name={props.name}
-                onChange={onChange(option)}
-                data-testid={`${props.testId}-${props.keyExtractor(option)}`}
+
+      <RadioGroup
+        ref={props.ref}
+        value={value ? String(value[props.keyValue]) : ""}
+        onValueChange={(val) => {
+          const selected = props.options.find(
+            (o) => String(o[props.keyValue]) === val
+          );
+          if (selected) props.onChange(selected);
+        }}
+        className="space-y-2"
+      >
+        {props.options.map((option) => {
+          const key = props.keyExtractor(option);
+          return (
+            <FormItem
+              key={key}
+              className="flex items-center space-x-2"
+            >
+              <RadioGroupItem
+                id={`${props.name}-${key}`}
+                value={String(option[props.keyValue])}
+                disabled={props.disabled}
+                data-testid={`${props.testId}-${key}`}
               />
-            }
-            label={props.renderOption(option)}
-          />
-        ))}
+              <FormLabel
+                htmlFor={`${props.name}-${key}`}
+                className="cursor-pointer"
+              >
+                {props.renderOption(option)}
+              </FormLabel>
+            </FormItem>
+          );
+        })}
       </RadioGroup>
+
       {!!props.error && (
-        <FormHelperText data-testid={`${props.testId}-error`}>
+        <FormMessage data-testid={`${props.testId}-error`}>
           {props.error}
-        </FormHelperText>
+        </FormMessage>
       )}
-    </FormControl>
+    </FormItem>
   );
 }
 

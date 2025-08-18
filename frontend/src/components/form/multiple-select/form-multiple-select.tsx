@@ -7,17 +7,23 @@ import {
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormHelperText from "@mui/material/FormHelperText";
-import OutlinedInput from "@mui/material/OutlinedInput";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 export type MultipleSelectInputProps<T extends object> = {
   label: string;
-  type?: string;
-  autoFocus?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
   error?: string;
@@ -34,65 +40,76 @@ function MultipleSelectInput<T extends object>(
     value: T[] | undefined | null;
     onChange: (value: T[]) => void;
     onBlur: () => void;
-    ref?: Ref<HTMLDivElement | null>;
+    ref?: Ref<HTMLButtonElement | null>;
   }
 ) {
+  const selectedKeys =
+    props.value?.map((v) => v?.[props.keyValue]?.toString()) ?? [];
+
+  const toggleValue = (selected: string) => {
+    const option = props.options.find(
+      (opt) => opt[props.keyValue]?.toString() === selected
+    );
+    if (!option) return;
+
+    let newValue: T[];
+    if (selectedKeys.includes(selected)) {
+      newValue = (props.value ?? []).filter(
+        (v) => v?.[props.keyValue]?.toString() !== selected
+      );
+    } else {
+      newValue = [...(props.value ?? []), option];
+    }
+    props.onChange(newValue);
+  };
+
   return (
-    <FormControl fullWidth error={!!props.error} disabled={props.disabled}>
-      <InputLabel id={`select-label-${props.name}`}>{props.label}</InputLabel>
-      <Select
-        ref={props.ref}
-        labelId={`select-label-${props.name}`}
-        id={`select-${props.name}`}
-        value={props.value?.map(
-          (value) => value?.[props.keyValue]?.toString() ?? ""
-        )}
-        input={<OutlinedInput label={props.label} />}
-        multiple
-        inputProps={{
-          readOnly: props.readOnly,
-        }}
-        onChange={(event) => {
-          const value = event.target.value;
-          const selectedStrings =
-            typeof value === "string" ? value.split(",") : value;
-
-          const newValue = selectedStrings
-            .map((selectedString) => {
-              const option = props.options.find(
-                (option) =>
-                  option[props.keyValue]?.toString() === selectedString
-              );
-
-              if (!option) return undefined;
-
-              return option;
-            })
-            .filter((option) => option !== undefined) as T[];
-
-          props.onChange(newValue);
-        }}
-        onBlur={props.onBlur}
-        data-testid={props.testId}
-        renderValue={() => {
-          return props.value ? props.renderValue(props.value) : undefined;
-        }}
-      >
-        {props.options.map((option) => (
-          <MenuItem
-            key={option[props.keyValue]?.toString()}
-            value={option[props.keyValue]?.toString()}
+    <FormItem className="w-full">
+      <FormLabel>{props.label}</FormLabel>
+      <FormControl>
+        <Select
+          onValueChange={toggleValue}
+          value={undefined} // cho phép multi chọn => reset giá trị để dùng toggle
+          disabled={props.disabled}
+        >
+          <SelectTrigger
+            ref={props.ref as any}
+            data-testid={props.testId}
+            className="flex flex-wrap gap-1 min-h-[2.5rem]"
           >
-            {props.renderOption(option)}
-          </MenuItem>
-        ))}
-      </Select>
-      {!!props.error && (
-        <FormHelperText data-testid={`${props.testId}-error`}>
+            {props.value && props.value.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {props.value.map((v) => (
+                  <Badge
+                    key={v[props.keyValue]?.toString()}
+                    variant="secondary"
+                  >
+                    {props.renderOption(v)}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <SelectValue placeholder="Select options..." />
+            )}
+          </SelectTrigger>
+          <SelectContent>
+            {props.options.map((option) => {
+              const key = option[props.keyValue]?.toString();
+              return (
+                <SelectItem key={key ?? ""} value={key ?? ""}>
+                  {props.renderOption(option)}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </FormControl>
+      {props.error && (
+        <FormMessage data-testid={`${props.testId}-error`}>
           {props.error}
-        </FormHelperText>
+        </FormMessage>
       )}
-    </FormControl>
+    </FormItem>
   );
 }
 
@@ -112,8 +129,6 @@ function FormMultipleSelectInput<
         <MultipleSelectInput<T>
           {...field}
           label={props.label}
-          autoFocus={props.autoFocus}
-          type={props.type}
           error={fieldState.error?.message}
           disabled={props.disabled}
           readOnly={props.readOnly}

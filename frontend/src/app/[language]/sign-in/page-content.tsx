@@ -1,24 +1,21 @@
 "use client";
-import Button from "@mui/material/Button";
-import LinkItem from "@mui/material/Link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import withPageRequiredGuest from "@/services/auth/with-page-required-guest";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
 import { useAuthLoginService } from "@/services/api/services/auth";
 import useAuthActions from "@/services/auth/use-auth-actions";
 import useAuthTokens from "@/services/auth/use-auth-tokens";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import FormTextInput from "@/components/form/text-input/form-text-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import Link from "@/components/link";
-import Box from "@mui/material/Box";
+import NextLink from "next/link";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { useTranslation } from "@/services/i18n/client";
 import SocialAuth from "@/services/social-auth/social-auth";
-import Divider from "@mui/material/Divider";
-import Chip from "@mui/material/Chip";
 import { isGoogleAuthEnabled } from "@/services/social-auth/google/google-config";
 import { isFacebookAuthEnabled } from "@/services/social-auth/facebook/facebook-config";
 import { IS_SIGN_UP_ENABLED } from "@/services/auth/config";
@@ -49,11 +46,10 @@ function FormActions() {
 
   return (
     <Button
-      variant="contained"
-      color="primary"
       type="submit"
       disabled={isSubmitting}
       data-testid="sign-in-submit"
+      className="w-full"
     >
       {t("sign-in:actions.submit")}
     </Button>
@@ -107,70 +103,67 @@ function Form() {
 
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit}>
-          <Grid container spacing={2} mb={2}>
-            <Grid size={{ xs: 12 }} mt={3}>
-              <Typography variant="h6">{t("sign-in:title")}</Typography>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<SignInFormData>
-                name="email"
-                label={t("sign-in:inputs.email.label")}
-                type="email"
-                testId="email"
-                autoFocus
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<SignInFormData>
-                name="password"
-                label={t("sign-in:inputs.password.label")}
-                type="password"
-                testId="password"
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <LinkItem
-                component={Link}
+      <div className="flex justify-center items-center min-h-[80vh]">
+        <form
+          onSubmit={onSubmit}
+          className="w-full max-w-md bg-white dark:bg-slate-900 rounded-lg shadow p-8"
+        >
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold mb-2">
+              {t("sign-in:title")}
+            </h1>
+          </div>
+          <div className="space-y-4">
+            <FormTextInput<SignInFormData>
+              name="email"
+              label={t("sign-in:inputs.email.label")}
+              type="email"
+              testId="email"
+              autoFocus
+            />
+            <FormTextInput<SignInFormData>
+              name="password"
+              label={t("sign-in:inputs.password.label")}
+              type="password"
+              testId="password"
+            />
+            <div className="flex justify-end">
+              <NextLink
                 href="/forgot-password"
                 data-testid="forgot-password"
+                className="text-sm text-blue-600 hover:underline"
               >
                 {t("sign-in:actions.forgotPassword")}
-              </LinkItem>
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormActions />
-
-              {IS_SIGN_UP_ENABLED && (
-                <Box ml={1} component="span">
-                  <Button
-                    variant="contained"
-                    color="inherit"
-                    LinkComponent={Link}
-                    href="/sign-up"
-                    data-testid="create-account"
-                  >
-                    {t("sign-in:actions.createAccount")}
-                  </Button>
-                </Box>
-              )}
-            </Grid>
-
-            {[isGoogleAuthEnabled, isFacebookAuthEnabled].some(Boolean) && (
-              <Grid size={{ xs: 12 }}>
-                <Divider sx={{ mb: 2 }}>
-                  <Chip label={t("sign-in:or")} />
-                </Divider>
-
-                <SocialAuth />
-              </Grid>
+              </NextLink>
+            </div>
+            <FormActions />
+            {IS_SIGN_UP_ENABLED && (
+              <Button
+                variant="outline"
+                asChild
+                className="w-full mt-2"
+                data-testid="create-account"
+              >
+                <NextLink href="/sign-up">
+                  {t("sign-in:actions.createAccount")}
+                </NextLink>
+              </Button>
             )}
-          </Grid>
+            {[isGoogleAuthEnabled, isFacebookAuthEnabled].some(Boolean) && (
+              <>
+                <div className="flex items-center my-4">
+                  <Separator className="flex-1" />
+                  <span className="mx-2 text-xs text-muted-foreground">
+                    {t("sign-in:or")}
+                  </span>
+                  <Separator className="flex-1" />
+                </div>
+                <SocialAuth />
+              </>
+            )}
+          </div>
         </form>
-      </Container>
+      </div>
     </FormProvider>
   );
 }

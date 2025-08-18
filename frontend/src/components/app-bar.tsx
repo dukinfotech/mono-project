@@ -1,286 +1,298 @@
-"use client";
-import { useState } from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
-import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
-import MenuItem from "@mui/material/MenuItem";
-import useAuth from "@/services/auth/use-auth";
-import useAuthActions from "@/services/auth/use-auth-actions";
-import CircularProgress from "@mui/material/CircularProgress";
-import { useTranslation } from "@/services/i18n/client";
-import Link from "@/components/link";
-import { RoleEnum } from "@/services/api/types/role";
-import Divider from "@mui/material/Divider";
-import ThemeSwitchButton from "@/components/switch-theme-button";
-import { IS_SIGN_UP_ENABLED } from "@/services/auth/config";
+import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
 
-function ResponsiveAppBar() {
-  const { t } = useTranslation("common");
-  const { user, isLoaded } = useAuth();
-  const { logOut } = useAuthActions();
-  const [anchorElementNav, setAnchorElementNav] = useState<null | HTMLElement>(
-    null
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
+interface MenuItem {
+  title: string;
+  url: string;
+  description?: string;
+  icon?: React.ReactNode;
+  items?: MenuItem[];
+}
+
+interface Navbar1Props {
+  logo?: {
+    url: string;
+    src: string;
+    alt: string;
+    title: string;
+  };
+  menu?: MenuItem[];
+  auth?: {
+    login: {
+      title: string;
+      url: string;
+    };
+    signup: {
+      title: string;
+      url: string;
+    };
+  };
+}
+
+const ResponsiveAppBar = ({
+  logo = {
+    url: "https://www.shadcnblocks.com",
+    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
+    alt: "logo",
+    title: "Shadcnblocks.com",
+  },
+  menu = [
+    { title: "Home", url: "#" },
+    {
+      title: "Products",
+      url: "#",
+      items: [
+        {
+          title: "Blog",
+          description: "The latest industry news, updates, and info",
+          icon: <Book className="size-5 shrink-0" />,
+          url: "#",
+        },
+        {
+          title: "Company",
+          description: "Our mission is to innovate and empower the world",
+          icon: <Trees className="size-5 shrink-0" />,
+          url: "#",
+        },
+        {
+          title: "Careers",
+          description: "Browse job listing and discover our workspace",
+          icon: <Sunset className="size-5 shrink-0" />,
+          url: "#",
+        },
+        {
+          title: "Support",
+          description:
+            "Get in touch with our support team or visit our community forums",
+          icon: <Zap className="size-5 shrink-0" />,
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Resources",
+      url: "#",
+      items: [
+        {
+          title: "Help Center",
+          description: "Get all the answers you need right here",
+          icon: <Zap className="size-5 shrink-0" />,
+          url: "#",
+        },
+        {
+          title: "Contact Us",
+          description: "We are here to help you with any questions you have",
+          icon: <Sunset className="size-5 shrink-0" />,
+          url: "#",
+        },
+        {
+          title: "Status",
+          description: "Check the current status of our services and APIs",
+          icon: <Trees className="size-5 shrink-0" />,
+          url: "#",
+        },
+        {
+          title: "Terms of Service",
+          description: "Our terms and conditions for using our services",
+          icon: <Book className="size-5 shrink-0" />,
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Pricing",
+      url: "#",
+    },
+    {
+      title: "Blog",
+      url: "#",
+    },
+  ],
+  auth = {
+    login: { title: "Sign in", url: "/sign-in" },
+    signup: { title: "Sign up", url: "sign-up" },
+  },
+}: Navbar1Props) => {
+  return (
+    <section className="py-4">
+      <div className="container">
+        {/* Desktop Menu */}
+        <nav className="hidden justify-between lg:flex">
+          <div className="flex items-center gap-6">
+            {/* Logo */}
+            <a href={logo.url} className="flex items-center gap-2">
+              <img
+                src={logo.src}
+                className="max-h-8 dark:invert"
+                alt={logo.alt}
+              />
+              <span className="text-lg font-semibold tracking-tighter">
+                {logo.title}
+              </span>
+            </a>
+            <div className="flex items-center">
+              <NavigationMenu>
+                <NavigationMenuList>
+                  {menu.map((item) => renderMenuItem(item))}
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <a href={auth.login.url}>{auth.login.title}</a>
+            </Button>
+            <Button asChild size="sm">
+              <a href={auth.signup.url}>{auth.signup.title}</a>
+            </Button>
+          </div>
+        </nav>
+
+        {/* Mobile Menu */}
+        <div className="block lg:hidden">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <a href={logo.url} className="flex items-center gap-2">
+              <img
+                src={logo.src}
+                className="max-h-8 dark:invert"
+                alt={logo.alt}
+              />
+            </a>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="size-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>
+                    <a href={logo.url} className="flex items-center gap-2">
+                      <img
+                        src={logo.src}
+                        className="max-h-8 dark:invert"
+                        alt={logo.alt}
+                      />
+                    </a>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-6 p-4">
+                  <Accordion
+                    type="single"
+                    collapsible
+                    className="flex w-full flex-col gap-4"
+                  >
+                    {menu.map((item) => renderMobileMenuItem(item))}
+                  </Accordion>
+
+                  <div className="flex flex-col gap-3">
+                    <Button asChild variant="outline">
+                      <a href={auth.login.url}>{auth.login.title}</a>
+                    </Button>
+                    <Button asChild>
+                      <a href={auth.signup.url}>{auth.signup.title}</a>
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </div>
+    </section>
   );
-  const [anchorElementUser, setAnchorElementUser] =
-    useState<null | HTMLElement>(null);
+};
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElementNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElementUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElementNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElementUser(null);
-  };
+const renderMenuItem = (item: MenuItem) => {
+  if (item.items) {
+    return (
+      <NavigationMenuItem key={item.title}>
+        <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
+        <NavigationMenuContent className="bg-popover text-popover-foreground">
+          {item.items.map((subItem) => (
+            <NavigationMenuLink asChild key={subItem.title} className="w-80">
+              <SubMenuLink item={subItem} />
+            </NavigationMenuLink>
+          ))}
+        </NavigationMenuContent>
+      </NavigationMenuItem>
+    );
+  }
 
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            {t("common:app-name")}
-          </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElementNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElementNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
-            >
-              <MenuItem onClick={handleCloseNavMenu} component={Link} href="/">
-                <Typography textAlign="center">
-                  {t("common:navigation.home")}
-                </Typography>
-              </MenuItem>
-
-              {!!user?.role &&
-                [RoleEnum.ADMIN].includes(Number(user?.role?.id)) && [
-                  <MenuItem
-                    key="users"
-                    onClick={handleCloseNavMenu}
-                    component={Link}
-                    href="/admin-panel/users"
-                  >
-                    <Typography textAlign="center">
-                      {t("common:navigation.users")}
-                    </Typography>
-                  </MenuItem>,
-                  // mobile-menu-items
-                ]}
-              {isLoaded &&
-                !user && [
-                  <Divider key="divider" />,
-                  <MenuItem
-                    key="sign-in"
-                    onClick={handleCloseNavMenu}
-                    component={Link}
-                    href="/sign-in"
-                  >
-                    <Typography textAlign="center">
-                      {t("common:navigation.signIn")}
-                    </Typography>
-                  </MenuItem>,
-                  IS_SIGN_UP_ENABLED ? (
-                    <MenuItem
-                      key="sign-up"
-                      onClick={handleCloseNavMenu}
-                      component={Link}
-                      href="/sign-up"
-                    >
-                      <Typography textAlign="center">
-                        {t("common:navigation.signUp")}
-                      </Typography>
-                    </MenuItem>
-                  ) : null,
-                ]}
-            </Menu>
-          </Box>
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            {t("common:app-name")}
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            <Button
-              onClick={handleCloseNavMenu}
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
-              href="/"
-            >
-              {t("common:navigation.home")}
-            </Button>
-
-            {!!user?.role &&
-              [RoleEnum.ADMIN].includes(Number(user?.role?.id)) && (
-                <>
-                  <Button
-                    onClick={handleCloseNavMenu}
-                    sx={{ my: 2, color: "white", display: "block" }}
-                    component={Link}
-                    href="/admin-panel/users"
-                  >
-                    {t("common:navigation.users")}
-                  </Button>
-                  {/* desktop-menu-items */}
-                </>
-              )}
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              mr: 1,
-            }}
-          >
-            <ThemeSwitchButton />
-          </Box>
-
-          {!isLoaded ? (
-            <CircularProgress color="inherit" />
-          ) : user ? (
-            <>
-              <Box sx={{ flexGrow: 0 }}>
-                <Tooltip title="Profile menu">
-                  <IconButton
-                    onClick={handleOpenUserMenu}
-                    sx={{ p: 0 }}
-                    data-testid="profile-menu-item"
-                  >
-                    <Avatar
-                      alt={user?.firstName + " " + user?.lastName}
-                      src={user.photo?.path}
-                    />
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  sx={{ mt: 5.5 }}
-                  id="menu-appbar"
-                  anchorEl={anchorElementUser}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(anchorElementUser)}
-                  onClose={handleCloseUserMenu}
-                >
-                  <MenuItem
-                    onClick={handleCloseUserMenu}
-                    component={Link}
-                    href="/profile"
-                    data-testid="user-profile"
-                  >
-                    <Typography textAlign="center">
-                      {t("common:navigation.profile")}
-                    </Typography>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      logOut();
-                      handleCloseUserMenu();
-                    }}
-                    data-testid="logout-menu-item"
-                  >
-                    <Typography textAlign="center">
-                      {t("common:navigation.logout")}
-                    </Typography>
-                  </MenuItem>
-                </Menu>
-              </Box>
-            </>
-          ) : (
-            <Box sx={{ flexGrow: 0, display: { xs: "none", md: "flex" } }}>
-              <Button
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: "white", display: "block" }}
-                component={Link}
-                href="/sign-in"
-              >
-                {t("common:navigation.signIn")}
-              </Button>
-              {IS_SIGN_UP_ENABLED && (
-                <Button
-                  onClick={handleCloseNavMenu}
-                  sx={{ my: 2, color: "white", display: "block" }}
-                  component={Link}
-                  href="/sign-up"
-                >
-                  {t("common:navigation.signUp")}
-                </Button>
-              )}
-            </Box>
-          )}
-        </Toolbar>
-      </Container>
-    </AppBar>
+    <NavigationMenuItem key={item.title}>
+      <NavigationMenuLink
+        href={item.url}
+        className="bg-background hover:bg-muted hover:text-accent-foreground group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors"
+      >
+        {item.title}
+      </NavigationMenuLink>
+    </NavigationMenuItem>
   );
-}
+};
+
+const renderMobileMenuItem = (item: MenuItem) => {
+  if (item.items) {
+    return (
+      <AccordionItem key={item.title} value={item.title} className="border-b-0">
+        <AccordionTrigger className="text-md py-0 font-semibold hover:no-underline">
+          {item.title}
+        </AccordionTrigger>
+        <AccordionContent className="mt-2">
+          {item.items.map((subItem) => (
+            <SubMenuLink key={subItem.title} item={subItem} />
+          ))}
+        </AccordionContent>
+      </AccordionItem>
+    );
+  }
+
+  return (
+    <a key={item.title} href={item.url} className="text-md font-semibold">
+      {item.title}
+    </a>
+  );
+};
+
+const SubMenuLink = ({ item }: { item: MenuItem }) => {
+  return (
+    <a
+      className="hover:bg-muted hover:text-accent-foreground flex select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors"
+      href={item.url}
+    >
+      <div className="text-foreground">{item.icon}</div>
+      <div>
+        <div className="text-sm font-semibold">{item.title}</div>
+        {item.description && (
+          <p className="text-muted-foreground text-sm leading-snug">
+            {item.description}
+          </p>
+        )}
+      </div>
+    </a>
+  );
+};
 export default ResponsiveAppBar;

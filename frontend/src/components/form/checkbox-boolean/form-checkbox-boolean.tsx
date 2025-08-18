@@ -1,17 +1,20 @@
 "use client";
 
-import { ChangeEvent, Ref } from "react";
+import { Ref } from "react";
 import {
   Controller,
   ControllerProps,
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import FormGroup from "@mui/material/FormGroup";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 export type CheckboxBooleanInputProps = {
   label: string;
@@ -33,44 +36,37 @@ function CheckboxBooleanInput(
   }
 ) {
   const value = props.value ?? false;
-  const onChange = (
-    event: ChangeEvent<HTMLInputElement>,
-    checkboxValue: boolean
-  ) => {
-    props.onChange(checkboxValue);
+
+  const onChange = (checked: boolean) => {
+    props.onChange(checked);
   };
+
   return (
-    <FormControl
-      data-testid={props.testId}
-      component="fieldset"
-      variant="standard"
-      error={!!props.error}
-    >
-      <FormGroup ref={props.ref}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={value}
-              onChange={onChange}
-              name={props.name}
-              data-testid={`${props.testId}-checkbox`}
-            />
-          }
-          label={props.label}
-        />
-      </FormGroup>
+    <FormItem className="flex flex-col space-y-2" data-testid={props.testId}>
+      <FormLabel htmlFor={props.name}>{props.label}</FormLabel>
+      <FormControl>
+        <div className="flex items-center space-x-2" ref={props.ref}>
+          <Checkbox
+            id={props.name}
+            checked={value}
+            onCheckedChange={onChange}
+            disabled={props.disabled || props.readOnly}
+            data-testid={`${props.testId}-checkbox`}
+          />
+        </div>
+      </FormControl>
       {!!props.error && (
-        <FormHelperText data-testid={`${props.testId}-error`}>
+        <FormMessage data-testid={`${props.testId}-error`}>
           {props.error}
-        </FormHelperText>
+        </FormMessage>
       )}
-    </FormControl>
+    </FormItem>
   );
 }
 
 function FormCheckboxBooleanInput<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >(
   props: CheckboxBooleanInputProps &
     Pick<ControllerProps<TFieldValues, TName>, "name" | "defaultValue">
